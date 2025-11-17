@@ -1,11 +1,6 @@
 import pytest
 from truco.carta import Carta
 
-# Tests adapted to current `Carta` API: instead of using rich-comparison
-# operators (not implemented in the original code), we assert on the
-# numeric point values returned by `retornar_pontos_carta` and on the
-# card numbers returned by `retornar_numero()`.
-
 def test_hierarquia_manilhas_rn07_using_points():
     helper = Carta(1, 'ESPADAS')
     espadao = Carta(1, 'ESPADAS')
@@ -43,9 +38,6 @@ def test_empate_cartas_comuns_rn04_using_numbers_and_points():
     sete_paus = Carta(7, 'PAUS')
     quatro_espadas = Carta(4, 'ESPADAS')
 
-    # same numeric value
     assert sete_copas.retornar_numero() == sete_paus.retornar_numero()
-    # points should also be equal for same numeric non-manilha cards
     assert helper.retornar_pontos_carta(sete_copas) == helper.retornar_pontos_carta(sete_paus)
-    # trivial identity check via number
     assert quatro_espadas.retornar_numero() == quatro_espadas.retornar_numero()

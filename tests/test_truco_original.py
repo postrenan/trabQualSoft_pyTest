@@ -1,24 +1,17 @@
-# tests/test_truco.py
-# Arquivo final de testes para o Jogo de Truco Gaudério
-# Valida os Requisitos Funcionais (RF) e Regras de Negócio (RN) estipulados.
-
 import pytest
 from unittest.mock import patch, MagicMock
 import os 
-import pathlib # Para encontrar o CSV de forma robusta
+import pathlib 
 
-# --- Importação das classes do projeto (a partir do pacote 'truco') ---
 try:
     from truco.carta import Carta
     from truco.baralho import Baralho
-    # Pontos pode estar definido como 'Pontos' ou 'pontos' no módulo; tente ambos
     try:
         from truco.pontos import Pontos
     except Exception:
         import truco.pontos as pontos_module
         Pontos = getattr(pontos_module, 'Pontos', getattr(pontos_module, 'pontos', None))
         if Pontos is None:
-            # Se o módulo pontos não expõe uma classe/objeto 'Pontos', forneça uma implementação mínima
             class Pontos:
                 def __init__(self):
                     self.jogador = 0
@@ -34,13 +27,11 @@ try:
                 def zerar_placar(self):
                     self.jogador = 0
                     self.maquina = 0
-                # Nome alternativo usado no teste; implementar como um alias
                 def adicionar_ponteiros_maquina(self, n):
                     self.adicionar_pontos_maquina(n)
     try:
         from truco.jogador import JogadorHumano, JogadorMaquina
     except Exception:
-        # Provide minimal fallback implementations for tests
         from truco import pontos as _pontos_mod
         ENVIDO_MAP = getattr(_pontos_mod, 'ENVIDO', {})
 
@@ -59,16 +50,12 @@ try:
             def calcular_envido(self):
                 if not self.mao:
                     return 0
-                # helper to get envido points per card value
                 def p(c):
                     return ENVIDO_MAP.get(str(c.retornar_numero()), 0)
-                # check suits
                 suits = [c.retornar_naipe().upper() for c in self.mao]
-                # three same suit -> flor
                 if len(set(suits)) == 1:
                     total = sum(p(c) for c in self.mao)
                     return total + 20
-                # any pair same suit
                 best = 0
                 n = len(self.mao)
                 for i in range(n):
@@ -79,7 +66,6 @@ try:
                                 best = val
                 if best > 0:
                     return best
-                # otherwise return highest envido single-card value
                 return max(p(c) for c in self.mao)
             def jogar_carta(self, idx):
                 return self.mao.pop(idx)
@@ -94,8 +80,6 @@ except ImportError as e:
 except ModuleNotFoundError:
     pytest.fail("ERRO: 'ModuleNotFoundError'. Verifique se 'truco/__init__.py' existe.")
 
-# --- Adaptações/monkeypatches para compatibilidade de API usada pelos testes ---
-# Adiciona propriedade 'valor', representacao string e operadores de comparação à classe Carta
 if not hasattr(Carta, 'valor'):
     setattr(Carta, 'valor', property(lambda self: self.numero))
 
@@ -136,7 +120,6 @@ print('  __gt__ ->', getattr(Carta, '__gt__', None), file=sys.stderr)
 print('  __lt__ ->', getattr(Carta, '__lt__', None), file=sys.stderr)
 print('  __eq__ ->', getattr(Carta, '__eq__', None), file=sys.stderr)
 
-# Adiciona método distribuir ao Baralho, se não existir
 if not hasattr(Baralho, 'distribuir'):
     def _distribuir(self, n):
         cards = []
@@ -146,7 +129,6 @@ if not hasattr(Baralho, 'distribuir'):
     setattr(Baralho, 'distribuir', _distribuir)
 
 
-# --- Fixtures (Configuração dos Testes) ---
 
 @pytest.fixture
 def baralho_novo():
@@ -166,9 +148,8 @@ def jogador_humano():
 @pytest.fixture
 def jogador_maquina(request):
     """Fixture para o jogador IA (Máquina)."""
-    # Encontra o caminho para a raiz do projeto (onde o pytest foi iniciado)
     PROJECT_ROOT = pathlib.Path(request.config.rootdir)
-    DB_PATH = PROJECT_ROOT / "dbtrucoimitacao_maos.csv" # Assumindo que o CSV está na raiz
+    DB_PATH = PROJECT_ROOT / "dbtrucoimitacao_maos.csv"
 
     if not DB_PATH.exists():
         pytest.skip(f"Arquivo CSV não encontrado em {DB_PATH}. Pulando testes da IA.")
@@ -180,25 +161,19 @@ def jogador_maquina(request):
 def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
     """Fixture para uma instância de Jogo pronta."""
     try:
-        # Cria Jogo usando a assinatura atual (sem argumentos) e injeta
-        # os jogadores e o placar para compatibilidade com os testes.
         game = Jogo()
         try:
             game.jogador1 = jogador_humano
             game.jogador2 = jogador_maquina
             game.placar = pontos_novo
         except Exception:
-            # se não for possível atribuir, ignore — os testes farão skip quando
-            # verificarem atributos/métodos ausentes
             pass
-        # adicionar stubs mínimos esperados pelos testes
         if not hasattr(game, 'baralho'):
             try:
                 game.baralho = Baralho()
             except Exception:
                 game.baralho = None
 
-        # iniciar_rodada: usa baralho.distribuir para popular as mãos
         def _iniciar_rodada(self):
             if not hasattr(self, 'baralho') or self.baralho is None:
                 raise AttributeError('baralho ausente')
@@ -219,11 +194,9 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
             from types import MethodType
             game.iniciar_rodada = MethodType(_iniciar_rodada, game)
 
-        # jogador1_eh_mao default
         if not hasattr(game, 'jogador1_eh_mao'):
             game.jogador1_eh_mao = True
 
-        # proxima_rodada: alterna jogador1_eh_mao
         def _proxima_rodada(self):
             self.jogador1_eh_mao = not getattr(self, 'jogador1_eh_mao', True)
 
@@ -231,9 +204,7 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
             from types import MethodType
             game.proxima_rodada = MethodType(_proxima_rodada, game)
 
-        # comparar_cartas: retorna 1 se primeira carta vence, 2 caso contrário
         def _comparar_cartas(self, c1, c2):
-            # compute points using pontos module (use uppercase naipe to match MANILHA keys)
             try:
                 import truco.pontos as _pontos_mod
                 def _pontos(card):
@@ -247,7 +218,6 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
                     return 1
                 return 2
             except Exception:
-                # fallback: compare by number
                 if c1.retornar_numero() >= c2.retornar_numero():
                     return 1
                 return 2
@@ -256,7 +226,6 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
             from types import MethodType
             game.comparar_cartas = MethodType(_comparar_cartas, game)
 
-        # vencedores_maos and determinar_vencedor_rodada
         if not hasattr(game, 'vencedores_maos'):
             game.vencedores_maos = [None, None, None]
 
@@ -268,7 +237,6 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
                 return 1
             if c2 > c1:
                 return 2
-            # empate: mão vence
             return 1 if getattr(self, 'jogador1_eh_mao', True) else 2
 
         if not hasattr(game, 'determinar_vencedor_rodada'):
@@ -277,7 +245,6 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
 
         return game
     except Exception as e:
-        # fallback para versões alternativas de Jogo (que aceitam parâmetros)
         try:
             return Jogo(jogador_humano, jogador_maquina, pontos_novo)
         except TypeError:
@@ -289,7 +256,6 @@ def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
                 pytest.skip(f"Não foi possível instanciar Jogo(). Verifique o __init__ em jogo.py. Erro: {e}")
 
 
-# --- Cartas Específicas para Testes de Hierarquia ---
 @pytest.fixture
 def espadao(): return Carta(1, 'espadas')
 
@@ -311,22 +277,18 @@ def sete_copas(): return Carta(7, 'copas')
 @pytest.fixture
 def quatro_paus(): return Carta(4, 'paus')
 
-
-# --- Testes baseados em test_valRequisitos.py e nossas RNs ---
-
 class TestCarta:
     """Testes de validação de cartas, hierarquia e comparação (RN07, RN04)."""
     
     def test_hierarquia_manilhas_rn07(self):
         """Valida (RN07): Manilhas têm hierarquia: 1♠ > 1♣ > 7♠ > 7♦ > 3."""
-        helper = Carta(1, 'ESPADAS')  # helper para retornar_pontos_carta
+        helper = Carta(1, 'ESPADAS') 
         espadao = Carta(1, 'ESPADAS')
         basto = Carta(1, 'BASTOS')
         sete_espadas = Carta(7, 'ESPADAS')
         sete_ouros = Carta(7, 'OUROS')
         tres_comum = Carta(3, 'COPAS')
 
-        # Verificar hierarquia usando pontos (único método disponível em Carta)
         assert helper.retornar_pontos_carta(espadao) > helper.retornar_pontos_carta(basto), \
             "1♠ deve vencer 1♣"
         assert helper.retornar_pontos_carta(basto) > helper.retornar_pontos_carta(sete_espadas), \
@@ -341,7 +303,7 @@ class TestCarta:
         helper = Carta(1, 'ESPADAS')
         tres = Carta(3, 'COPAS')
         dois = Carta(2, 'OUROS')
-        as_comum = Carta(1, 'COPAS')  # Ás (1) como carta comum
+        as_comum = Carta(1, 'COPAS')  
         rei = Carta(12, 'ESPADAS')
         dama = Carta(11, 'BASTOS')
         dez = Carta(10, 'COPAS')
@@ -350,7 +312,6 @@ class TestCarta:
         cinco = Carta(5, 'OUROS')
         quatro = Carta(4, 'BASTOS')
 
-        # Validar hierarquia: 3 > 2 > 1 > 12 > 11 > 10 > 7 > 6 > 5 > 4
         assert helper.retornar_pontos_carta(tres) > helper.retornar_pontos_carta(dois), "3 > 2"
         assert helper.retornar_pontos_carta(dois) > helper.retornar_pontos_carta(as_comum), "2 > 1"
         assert helper.retornar_pontos_carta(as_comum) > helper.retornar_pontos_carta(rei), "1 > 12"
@@ -369,7 +330,6 @@ class TestCarta:
         quatro_espadas = Carta(4, 'ESPADAS')
         quatro_ouros = Carta(4, 'OUROS')
 
-        # Mesmos números devem ter mesmos pontos
         assert sete_copas.retornar_numero() == sete_paus.retornar_numero(), \
             "Ambas as setes devem ter número 7"
         assert helper.retornar_pontos_carta(sete_copas) == helper.retornar_pontos_carta(sete_paus), \
@@ -438,7 +398,7 @@ class TestPontos:
     def test_zerar_placar_rf42(self, pontos_novo):
         """Valida (RF42): Zerar o placar ao reiniciar."""
         pontos_novo.adicionar_pontos_jogador(10)
-        pontos_novo.adicionar_ponteiros_maquina(8) # Corrigindo nome do método
+        pontos_novo.adicionar_ponteiros_maquina(8)
         assert pontos_novo.get_placar() != (0, 0)
         
         pontos_novo.zerar_placar()
@@ -487,7 +447,7 @@ class TestJogador:
         jogador_humano.receber_cartas(cartas)
         assert len(jogador_humano.mao) == 3
         
-        carta_jogada = jogador_humano.jogar_carta(1) # joga a carta do índice 1
+        carta_jogada = jogador_humano.jogar_carta(1)  
         
         assert carta_jogada == quatro_paus
         assert len(jogador_humano.mao) == 2
@@ -528,12 +488,9 @@ class TestJogoLogic:
         if not hasattr(jogo_novo, 'jogador1_eh_mao'):
              pytest.skip("Jogo() não tem o atributo 'jogador1_eh_mao'.")
         
-        # Validar que o atributo existe e é um booleano
         assert isinstance(jogo_novo.jogador1_eh_mao, bool), \
             "jogador1_eh_mao deve ser um booleano (True ou False)"
         
-        # Validar que a mão é designada a exatamente um jogador
-        # Se J1 é mão, então J2 não é (e vice-versa)
         jogador2_eh_mao = not jogo_novo.jogador1_eh_mao
         assert isinstance(jogador2_eh_mao, bool), \
             "Inversão de jogador1_eh_mao deve resultar em booleano válido"
@@ -656,7 +613,7 @@ class TestJogoApostas:
         jogo_novo.jogador2.pontos_envido = 28
         
         if jogo_novo.jogador1.pontos_envido > jogo_novo.jogador2.pontos_envido:
-             jogo_novo.placar.adicionar_pontos_jogador(2) # Envido vale 2
+             jogo_novo.placar.adicionar_pontos_jogador(2) 
         else:
              jogo_novo.placar.adicionar_pontos_maquina(2)
 
@@ -666,14 +623,13 @@ class TestJogoApostas:
         """Valida (UC-04): Disputa de Flor vs Flor (J2 tem mais)."""
         jogo_novo.placar = pontos_novo
         
-        # Mocka a função de receber cartas
         if not hasattr(jogo_novo.jogador1, 'receber_cartas'):
             jogo_novo.jogador1.receber_cartas = lambda x: setattr(jogo_novo.jogador1, 'mao', x)
         if not hasattr(jogo_novo.jogador2, 'receber_cartas'):
             jogo_novo.jogador2.receber_cartas = lambda x: setattr(jogo_novo.jogador2, 'mao', x)
         
-        jogo_novo.jogador1.receber_cartas([Carta(7, 'ouros'), Carta(3, 'ouros'), Carta(10, 'ouros')]) # Envido 30
-        jogo_novo.jogador2.receber_cartas([Carta(7, 'copas'), Carta(6, 'copas'), Carta(11, 'copas')]) # Envido 34
+        jogo_novo.jogador1.receber_cartas([Carta(7, 'ouros'), Carta(3, 'ouros'), Carta(10, 'ouros')])
+        jogo_novo.jogador2.receber_cartas([Carta(7, 'copas'), Carta(6, 'copas'), Carta(11, 'copas')])
         
         j1_pontos = jogo_novo.jogador1.calcular_envido()
         j2_pontos = jogo_novo.jogador2.calcular_envido()
