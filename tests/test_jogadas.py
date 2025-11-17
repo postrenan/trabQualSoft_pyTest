@@ -147,7 +147,7 @@ def jogador_humano():
 
 @pytest.fixture
 def jogador_maquina(request):
-    #Fixture para o jogador IA (Máquina)
+    #Fixture para Máquina
     PROJECT_ROOT = pathlib.Path(request.config.rootdir)
     DB_PATH = PROJECT_ROOT / "dbtrucoimitacao_maos.csv"
 
@@ -296,9 +296,9 @@ class TestCarta:
         assert helper.retornar_pontos_carta(sete_espadas) > helper.retornar_pontos_carta(sete_ouros), \
             "7 espadas deve vencer 7 ouros"
         assert helper.retornar_pontos_carta(sete_ouros) > helper.retornar_pontos_carta(tres_comum), \
-            "7 ouros deve vencer 3"
+            "7 ouros deve vencer 3 "
 
-    def test_hierarquia_cartas_comuns_rn07(self):
+    def test_hierarquia_cartas_comuns(self):
         # Cartas comuns: 3 > 2 > 1 > 12 > 11 > 10 > 7 > 6 > 5 > 4. 
         helper = Carta(1, 'ESPADAS')
         tres = Carta(3, 'COPAS')
@@ -322,7 +322,7 @@ class TestCarta:
         assert helper.retornar_pontos_carta(seis) > helper.retornar_pontos_carta(cinco), "6 > 5"
         assert helper.retornar_pontos_carta(cinco) > helper.retornar_pontos_carta(quatro), "5 > 4"
 
-    def test_empate_cartas_comuns_rn04(self):
+    def test_empate_cartas_comuns(self):
         #RN04 : Cartas com mesmo número resultam em empate (mesmo valor de pontos). 
         helper = Carta(1, 'ESPADAS')
         sete_copas = Carta(7, 'COPAS')
@@ -342,8 +342,6 @@ class TestCarta:
 
 class TestBaralho:
     
-
-
     def test_baralho_tem_40_cartas(self, baralho_novo):
         #Verifica se tem 40 cartas . 
         assert len(baralho_novo.cartas) == 40
