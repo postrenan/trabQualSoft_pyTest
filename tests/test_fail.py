@@ -8,13 +8,13 @@ from truco.carta import Carta
 
 def test_hierarquia_manilhas_rn07_using_points():
     helper = Carta(1, 'ESPADAS')
-    espedao = Carta(1, 'ESPADAS')
+    espadao = Carta(1, 'ESPADAS')
     basto = Carta(1, 'BASTOS')
     sete_espadas = Carta(7, 'ESPADAS')
     sete_ouros = Carta(7, 'OUROS')
     tres_comum = Carta(3, 'COPAS')
 
-    assert helper.retornar_pontos_carta(espedao) > helper.retornar_pontos_carta(basto)
+    assert helper.retornar_pontos_carta(espadao) > helper.retornar_pontos_carta(basto)
     assert helper.retornar_pontos_carta(basto) > helper.retornar_pontos_carta(sete_espadas)
     assert helper.retornar_pontos_carta(sete_espadas) > helper.retornar_pontos_carta(sete_ouros)
     assert helper.retornar_pontos_carta(sete_ouros) > helper.retornar_pontos_carta(tres_comum)
