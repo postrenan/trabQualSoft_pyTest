@@ -132,22 +132,22 @@ if not hasattr(Baralho, 'distribuir'):
 
 @pytest.fixture
 def baralho_novo():
-    """Fixture para um baralho novo, pronto para embaralhar."""
+    #Fixture para um baralho novo, pronto para embaralhar
     return Baralho()
 
 @pytest.fixture
 def pontos_novo():
-    """Fixture para um placar zerado."""
+    #Fixture para um placar zerado
     return Pontos()
 
 @pytest.fixture
 def jogador_humano():
-    """Fixture para um jogador humano."""
+    #Fixture para um jogador humano
     return JogadorHumano("Humano")
 
 @pytest.fixture
 def jogador_maquina(request):
-    """Fixture para o jogador IA (Máquina)."""
+    #Fixture para o jogador IA (Máquina)
     PROJECT_ROOT = pathlib.Path(request.config.rootdir)
     DB_PATH = PROJECT_ROOT / "dbtrucoimitacao_maos.csv"
 
@@ -159,7 +159,7 @@ def jogador_maquina(request):
 
 @pytest.fixture
 def jogo_novo(jogador_humano, jogador_maquina, pontos_novo):
-    """Fixture para uma instância de Jogo pronta."""
+    #instância de Jogo pronta.
     try:
         game = Jogo()
         try:
@@ -278,10 +278,10 @@ def sete_copas(): return Carta(7, 'copas')
 def quatro_paus(): return Carta(4, 'paus')
 
 class TestCarta:
-    """Testes de validação de cartas, hierarquia e comparação (RN07, RN04)."""
+    #Testes de ção de cartas, hierarquia e comparação
     
-    def test_hierarquia_manilhas_rn07(self):
-        """Valida (RN07): Manilhas têm hierarquia: 1♠ > 1♣ > 7♠ > 7♦ > 3."""
+    def test_hierarquia_manilhas(self):
+        # Manilhas têm hierarquia: 1 de ESPADAS > 1 de BASTOS > 7 de ESPADAS > 7 de OUROS > 3.
         helper = Carta(1, 'ESPADAS') 
         espadao = Carta(1, 'ESPADAS')
         basto = Carta(1, 'BASTOS')
@@ -290,16 +290,16 @@ class TestCarta:
         tres_comum = Carta(3, 'COPAS')
 
         assert helper.retornar_pontos_carta(espadao) > helper.retornar_pontos_carta(basto), \
-            "1♠ deve vencer 1♣"
+            "1 espadas deve vencer 1 bastos"
         assert helper.retornar_pontos_carta(basto) > helper.retornar_pontos_carta(sete_espadas), \
-            "1♣ deve vencer 7♠"
+            "1 bastos deve vencer 7 espadas"
         assert helper.retornar_pontos_carta(sete_espadas) > helper.retornar_pontos_carta(sete_ouros), \
-            "7♠ deve vencer 7♦"
+            "7 espadas deve vencer 7 ouros"
         assert helper.retornar_pontos_carta(sete_ouros) > helper.retornar_pontos_carta(tres_comum), \
-            "7♦ deve vencer 3"
+            "7 ouros deve vencer 3"
 
     def test_hierarquia_cartas_comuns_rn07(self):
-        """Valida (RN07): Cartas comuns: 3 > 2 > 1 > 12 > 11 > 10 > 7 > 6 > 5 > 4."""
+        # Cartas comuns: 3 > 2 > 1 > 12 > 11 > 10 > 7 > 6 > 5 > 4. 
         helper = Carta(1, 'ESPADAS')
         tres = Carta(3, 'COPAS')
         dois = Carta(2, 'OUROS')
@@ -323,7 +323,7 @@ class TestCarta:
         assert helper.retornar_pontos_carta(cinco) > helper.retornar_pontos_carta(quatro), "5 > 4"
 
     def test_empate_cartas_comuns_rn04(self):
-        """Valida (RN04): Cartas com mesmo número resultam em empate (mesmo valor de pontos)."""
+        #RN04 : Cartas com mesmo número resultam em empate (mesmo valor de pontos). 
         helper = Carta(1, 'ESPADAS')
         sete_copas = Carta(7, 'COPAS')
         sete_paus = Carta(7, 'PAUS')
@@ -334,7 +334,6 @@ class TestCarta:
             "Ambas as setes devem ter número 7"
         assert helper.retornar_pontos_carta(sete_copas) == helper.retornar_pontos_carta(sete_paus), \
             "Setes de naipes diferentes devem ter mesmos pontos (empate)"
-        
         assert quatro_espadas.retornar_numero() == quatro_ouros.retornar_numero(), \
             "Ambos os quatros devem ter número 4"
         assert helper.retornar_pontos_carta(quatro_espadas) == helper.retornar_pontos_carta(quatro_ouros), \
@@ -342,18 +341,21 @@ class TestCarta:
 
 
 class TestBaralho:
-    def test_baralho_tem_40_cartas_rn02(self, baralho_novo):
-        """Valida (RN02): O sistema deve usar o baralho espanhol de 40 cartas."""
+    
+
+
+    def test_baralho_tem_40_cartas(self, baralho_novo):
+        #Verifica se tem 40 cartas . 
         assert len(baralho_novo.cartas) == 40
 
-    def test_baralho_sem_8_e_9_rn02(self, baralho_novo):
-        """Valida (RN02): Baralho exclui os números 8 e 9."""
+    def test_baralho_sem_8_e_9(self, baralho_novo):
+        #Baralho exclui os números 8 e 9. 
         valores_proibidos = [8, 9]
         for carta in baralho_novo.cartas:
             assert carta.valor not in valores_proibidos
 
-    def test_baralho_embaralhar_uc01(self, baralho_novo):
-        """Valida (UC-01): O sistema deve embaralhar as cartas."""
+    def test_baralho_embaralhar(self, baralho_novo):
+        #embaralhar as cartas. 
         baralho_ordenado = [str(c) for c in baralho_novo.cartas]
         baralho_novo.embaralhar()
         baralho_embaralhado = [str(c) for c in baralho_novo.cartas]
@@ -361,8 +363,8 @@ class TestBaralho:
         assert baralho_ordenado != baralho_embaralhado
         assert len(baralho_ordenado) == len(baralho_embaralhado)
 
-    def test_baralho_distribuir_rf02(self, baralho_novo):
-        """Valida (RF02): O sistema deve distribuir 3 cartas."""
+    def test_baralho_distribuir(self, baralho_novo):
+        #distribuir 3 cartas
         tamanho_antes = len(baralho_novo.cartas)
         cartas_distribuidas = baralho_novo.distribuir(3)
         
@@ -371,32 +373,32 @@ class TestBaralho:
 
 
 class TestPontos:
-    def test_pontos_inicia_zerado_rf30(self, pontos_novo):
-        """Valida (RF30): Placar inicial deve ser (0, 0)."""
+    def test_pontos_inicia_zerado(self, pontos_novo):
+        # Placar inicial deve ser (0, 0)
         assert pontos_novo.get_placar() == (0, 0)
 
-    def test_adicionar_pontos_rf31(self, pontos_novo):
-        """Valida (RF31): Adicionar pontos corretamente."""
+    def test_adicionar_pontos(self, pontos_novo):
+        # Adicionar pontos corretamente
         pontos_novo.adicionar_pontos_jogador(2)
         assert pontos_novo.get_placar() == (2, 0)
         pontos_novo.adicionar_pontos_maquina(3)
         assert pontos_novo.get_placar() == (2, 3)
 
-    def test_vitoria_com_24_pontos_rn05(self, pontos_novo):
-        """Valida (RN05): Jogo deve terminar com 24 pontos."""
+    def test_vitoria_com_24_pontos(self, pontos_novo):
+        # Jogo deve terminar com 24 pontos
         pontos_novo.adicionar_pontos_jogador(23)
         assert pontos_novo.alguem_ganhou(24) is False
         
         pontos_novo.adicionar_pontos_jogador(1)
         assert pontos_novo.alguem_ganhou(24) is True
 
-    def test_vitoria_maquina_com_24_pontos_rn05(self, pontos_novo):
-        """Valida (RN05): Jogo deve terminar com 24 pontos (Máquina)."""
+    def test_vitoria_maquina_com_24_pontos(self, pontos_novo):
+        #Jogo deve terminar com 24 pontos (Máquina)
         pontos_novo.adicionar_pontos_maquina(25)
         assert pontos_novo.alguem_ganhou(24) is True
 
-    def test_zerar_placar_rf42(self, pontos_novo):
-        """Valida (RF42): Zerar o placar ao reiniciar."""
+    def test_zerar_placar(self, pontos_novo):
+        #Zerar o placar ao reiniciar
         pontos_novo.adicionar_pontos_jogador(10)
         pontos_novo.adicionar_ponteiros_maquina(8)
         assert pontos_novo.get_placar() != (0, 0)
@@ -406,43 +408,43 @@ class TestPontos:
 
 
 class TestJogador:
-    def test_receber_cartas_rf02(self, jogador_humano):
-        """Valida (RF02): Jogador recebe 3 cartas na mão."""
+    def test_receber_cartas(self, jogador_humano):
+        #Jogador recebe 3 cartas na mão
         cartas = [Carta(1,'paus'), Carta(2,'copas'), Carta(3,'espadas')]
         jogador_humano.receber_cartas(cartas)
         assert len(jogador_humano.mao) == 3
         assert jogador_humano.mao[0].valor == 1
 
-    def test_jogador_tem_flor_verdadeiro_rf25(self, jogador_humano):
-        """Valida (RF25): Detecção correta de Flor (3 cartas do mesmo naipe)."""
+    def test_jogador_tem_flor_verdadeiro(self, jogador_humano):
+        #Detecção correta de Flor (3 cartas do mesmo naipe)
         jogador_humano.receber_cartas([Carta(7, 'copas'), Carta(6, 'copas'), Carta(1, 'copas')])
         assert jogador_humano.tem_flor() is True
 
-    def test_jogador_tem_flor_falso_rf25(self, jogador_humano):
-        """Valida (RF25): Detecção correta de ausência de Flor."""
+    def test_jogador_tem_flor_falso(self, jogador_humano):
+        #Detecção correta de ausência de Flor
         jogador_humano.receber_cartas([Carta(7, 'copas'), Carta(6, 'ouros'), Carta(1, 'copas')])
         assert jogador_humano.tem_flor() is False
 
-    def test_calcular_envido_com_flor_uc03(self, jogador_humano):
-        """Valida (UC-03): Cálculo de Envido tendo Flor (3 do mesmo naipe)."""
+    def test_calcular_envido_com_flor(self, jogador_humano):
+        #Cálculo de Envido tendo Flor (3 do mesmo naipe)
         jogador_humano.receber_cartas([Carta(7, 'ouros'), Carta(6, 'ouros'), Carta(5, 'ouros')])
         assert jogador_humano.calcular_envido() == 38
 
-    def test_calcular_envido_duas_cartas_uc03(self, jogador_humano):
-        """Valida (UC-03): Cálculo de Envido com 2 cartas do mesmo naipe."""
+    def test_calcular_envido_duas_cartas(self, jogador_humano):
+        #Cálculo de Envido com 2 cartas do mesmo naipe
         jogador_humano.receber_cartas([Carta(7, 'espadas'), Carta(3, 'espadas'), Carta(5, 'ouros')])
         assert jogador_humano.calcular_envido() == 30
 
-    def test_calcular_envido_sem_combinacao_uc03(self, jogador_humano):
-        """Valida (UC-03): Cálculo de Envido sem naipes iguais (retorna maior carta)."""
+    def test_calcular_envido_sem_combinacao(self, jogador_humano):
+        #Cálculo de Envido sem naipes iguais (retorna maior carta)
         jogador_humano.receber_cartas([Carta(12, 'copas'), Carta(7, 'espadas'), Carta(5, 'ouros')])
         assert jogador_humano.calcular_envido() == 7
         
         jogador_humano.receber_cartas([Carta(12, 'copas'), Carta(11, 'espadas'), Carta(10, 'ouros')])
         assert jogador_humano.calcular_envido() == 0
 
-    def test_jogador_joga_carta_rf04(self, jogador_humano, sete_copas, quatro_paus, tres_comum):
-        """Valida (RF04): Jogar uma carta a retira da mão."""
+    def test_jogador_joga_carta(self, jogador_humano, sete_copas, quatro_paus, tres_comum):
+        #Jogar uma carta a retira da mão
         cartas = [sete_copas, quatro_paus, tres_comum]
         jogador_humano.receber_cartas(cartas)
         assert len(jogador_humano.mao) == 3
@@ -455,8 +457,8 @@ class TestJogador:
 
 
 class TestJogoLogic:
-    def test_iniciar_rodada_distribui_cartas_uc01(self, jogo_novo):
-        """Valida (UC-01): iniciar_rodada() distribui cartas aos jogadores."""
+    def test_iniciar_rodada_distribui_cartas(self, jogo_novo):
+        #iniciar_rodada() distribui cartas aos jogadores
         if not hasattr(jogo_novo, 'baralho'):
              pytest.skip("Jogo() não parece ter o atributo 'baralho' para mockar.")
         
@@ -475,16 +477,9 @@ class TestJogoLogic:
         assert len(jogo_novo.jogador2.mao) == 3
         assert jogo_novo.baralho.distribuir.call_count == 2
 
-    def test_definir_mao_inicial_rf35(self, jogo_novo):
-        """Valida (RF35): A 'mão' inicial é definida na criação do jogo (determinístico ou aleatório).
+    def test_definir_mao_inicial(self, jogo_novo):
+       # A 'mão' inicial é definida na criação do jogo.
         
-        Nota: RF35 especifica que a 'mão' (primeiro a jogar em uma rodada) é definida.
-        A implementação pode ser:
-        - Determinística: Jogador 1 sempre começa como mão (valor inicial = True)
-        - Aleatória: 50% de chance para cada jogador (valor = True ou False)
-        
-        Este teste valida que o atributo existe e tem um valor booleano válido.
-        """
         if not hasattr(jogo_novo, 'jogador1_eh_mao'):
              pytest.skip("Jogo() não tem o atributo 'jogador1_eh_mao'.")
         
@@ -495,8 +490,8 @@ class TestJogoLogic:
         assert isinstance(jogador2_eh_mao, bool), \
             "Inversão de jogador1_eh_mao deve resultar em booleano válido"
 
-    def test_alternar_mao_rf36(self, jogo_novo):
-        """Valida (RF36): O 'mão' (primeiro a jogar) é alternado a cada rodada."""
+    def test_alternar_mao(self, jogo_novo):
+        # O 'mão' (primeiro a jogar) é alternado a cada rodada
         if not hasattr(jogo_novo, 'jogador1_eh_mao') or not hasattr(jogo_novo, 'proxima_rodada'):
              pytest.skip("Jogo() não tem 'jogador1_eh_mao' ou 'proxima_rodada'.")
         
@@ -507,8 +502,8 @@ class TestJogoLogic:
         jogo_novo.proxima_rodada()
         assert jogo_novo.jogador1_eh_mao is True
 
-    def test_jogo_comparar_cartas_manilha_vs_comum_rf10(self, jogo_novo, espadao, tres_comum):
-        """Valida (RF10): Comparar cartas (Manilha ganha de comum)."""
+    def test_jogo_comparar_cartas_manilha_vs_comum(self, jogo_novo, espadao, tres_comum):
+        # Comparar cartas (Manilha ganha de comum)
         if not hasattr(jogo_novo, 'comparar_cartas'):
              pytest.skip("Jogo() não tem o método 'comparar_cartas'.")
              
@@ -518,8 +513,8 @@ class TestJogoLogic:
         vencedor_invertido = jogo_novo.comparar_cartas(tres_comum, espadao)
         assert vencedor_invertido == 2
 
-    def test_desempate_empate_1_j1_ganha_2_rn04(self, jogo_novo):
-        """Valida (RN04): Empate na 1ª mão, J1 ganha a 2ª (J1 vence a rodada)."""
+    def test_desempate_empate_1_j1_ganha_2_(self, jogo_novo):
+        # Empate na 1ª mão, J1 ganha a 2ª (J1 vence a rodada)
         if not hasattr(jogo_novo, 'vencedores_maos') or not hasattr(jogo_novo, 'determinar_vencedor_rodada'):
              pytest.skip("Jogo() não tem 'vencedores_maos' ou 'determinar_vencedor_rodada'.")
              
@@ -527,8 +522,8 @@ class TestJogoLogic:
         vencedor_rodada = jogo_novo.determinar_vencedor_rodada()
         assert vencedor_rodada == 1
 
-    def test_desempate_j1_ganha_1_empate_2_rn04(self, jogo_novo):
-        """Valida (RN04): J1 ganha a 1ª mão, Empate na 2ª (J1 vence a rodada)."""
+    def test_desempate_j1_ganha_1_empate_2(self, jogo_novo):
+        #J1 ganha a 1ª mão, Empate na 2ª (J1 vence a rodada)
         if not hasattr(jogo_novo, 'vencedores_maos') or not hasattr(jogo_novo, 'determinar_vencedor_rodada'):
              pytest.skip("Jogo() não tem 'vencedores_maos' ou 'determinar_vencedor_rodada'.")
 
@@ -536,8 +531,8 @@ class TestJogoLogic:
         vencedor_rodada = jogo_novo.determinar_vencedor_rodada()
         assert vencedor_rodada == 1
 
-    def test_desempate_j1_ganha_1_empate_3_rn04(self, jogo_novo):
-        """Valida (RN04): J1 ganha 1ª, J2 ganha 2ª, Empate 3ª (J1 vence)."""
+    def test_desempate_j1_ganha_1_empate_3(self, jogo_novo):
+        #J1 ganha 1ª, J2 ganha 2ª, Empate 3ª (J1 vence)
         if not hasattr(jogo_novo, 'vencedores_maos') or not hasattr(jogo_novo, 'determinar_vencedor_rodada'):
              pytest.skip("Jogo() não tem 'vencedores_maos' ou 'determinar_vencedor_rodada'.")
 
@@ -545,8 +540,8 @@ class TestJogoLogic:
         vencedor_rodada = jogo_novo.determinar_vencedor_rodada()
         assert vencedor_rodada == 1
 
-    def test_desempate_tres_empates_mao_vence_rn04(self, jogo_novo):
-        """Valida (RN04): Três empates (Mão vence a rodada)."""
+    def test_desempate_tres_empates_mao_vence(self, jogo_novo):
+        # Três empates (Mão vence a rodada)
         if not hasattr(jogo_novo, 'vencedores_maos') or not hasattr(jogo_novo, 'determinar_vencedor_rodada'):
              pytest.skip("Jogo() não tem 'vencedores_maos' ou 'determinar_vencedor_rodada'.")
              
@@ -562,8 +557,8 @@ class TestJogoLogic:
 
 class TestJogoApostas:
     
-    def test_recusar_truco_da_1_ponto_rf17(self, jogo_novo, pontos_novo):
-        """Valida (RF17): Recusar truco dá 1 ponto ao chamador."""
+    def test_recusar_truco_da_1_ponto(self, jogo_novo, pontos_novo):
+        # Recusar truco dá 1 ponto ao chamador
         jogo_novo.placar = pontos_novo
         placar_antes = jogo_novo.placar.get_placar()[0]
         
@@ -572,8 +567,8 @@ class TestJogoApostas:
         placar_depois = jogo_novo.placar.get_placar()[0]
         assert placar_depois == placar_antes + 1
 
-    def test_recusar_envido_da_1_ponto_uc03(self, jogo_novo, pontos_novo):
-        """Valida (UC-03): Recusar envido ('Não Quero') dá 1 ponto ao chamador."""
+    def test_recusar_envido_da_1_ponto(self, jogo_novo, pontos_novo):
+        #Recusar envido ('Não Quero') dá 1 ponto ao chamador
         jogo_novo.placar = pontos_novo
         placar_antes = jogo_novo.placar.get_placar()[0]
 
@@ -582,8 +577,8 @@ class TestJogoApostas:
         placar_depois = jogo_novo.placar.get_placar()[0]
         assert placar_depois == placar_antes + 1
 
-    def test_flor_obrigatoria_rf25(self, jogo_novo, pontos_novo):
-        """Valida (RF25): O sistema deve detectar Flor obrigatória."""
+    def test_flor_obrigatoria(self, jogo_novo, pontos_novo):
+        #O sistema deve detectar Flor obrigatória
         jogo_novo.placar = pontos_novo
         
         cartas_flor = [Carta(7, 'copas'), Carta(6, 'copas'), Carta(1, 'copas')]
@@ -605,8 +600,8 @@ class TestJogoApostas:
         
         assert jogo_novo.placar.get_placar() == (3, 0)
 
-    def test_jogo_resolve_envido_vencedor_uc03(self, jogo_novo, pontos_novo):
-        """Valida (UC-03 / RF24): Contabilizar pontos do Envido (J1 tem mais)."""
+    def test_jogo_resolve_envido_vencedor(self, jogo_novo, pontos_novo):
+        #Contabilizar pontos do Envido (J1 tem mais)
         jogo_novo.placar = pontos_novo
         
         jogo_novo.jogador1.pontos_envido = 32
@@ -619,8 +614,8 @@ class TestJogoApostas:
 
         assert jogo_novo.placar.get_placar() == (2, 0)
 
-    def test_jogo_resolve_flor_vs_flor_uc04(self, jogo_novo, pontos_novo):
-        """Valida (UC-04): Disputa de Flor vs Flor (J2 tem mais)."""
+    def test_jogo_resolve_flor_vs_flor(self, jogo_novo, pontos_novo):
+        #  Disputa de Flor vs Flor (J2 tem mais)
         jogo_novo.placar = pontos_novo
         
         if not hasattr(jogo_novo.jogador1, 'receber_cartas'):
